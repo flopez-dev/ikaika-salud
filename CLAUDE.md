@@ -51,15 +51,23 @@ Ahora mismo es solo el esqueleto: una home «Web en construcción» y una 404. F
 
 ## Ramas y despliegue
 
+**De momento el sitio vive solo en `develop`** (decidido el 2026-11-13): la copia de GitHub
+Pages es la web, no hay producción ni dominio propio. `main` existe pero no se usa: no se
+integra nada en ella ni se despliega.
+
 | Rama / evento | Destino                                                                   |
 | :------------ | :------------------------------------------------------------------------ |
 | cualquiera/PR | CI (`ci.yml`): formato, lint, tipos, build con base path y e2e            |
 | `develop`     | Tras un CI en verde, GitHub Pages sin indexar (`deploy-pages.yml`): https://flopez-dev.github.io/ikaika-salud/ |
-| `main`        | Producción. **Aún sin despliegue**: falta el dominio del cliente          |
 
-Se trabaja en ramas que salen de `develop`, se integran en `develop` (se ve en Pages) y de ahí
-a `main`. El repo es público, por eso Pages sirve en el plan Free. `.github/dependabot.yml`
-abre cada semana PR de dependencias y acciones **contra `develop`**.
+Se trabaja en ramas que salen de `develop` y se integran en `develop`. El repo es público, por
+eso Pages sirve en el plan Free. `.github/dependabot.yml` abre cada semana PR de dependencias y
+acciones **contra `develop`**.
 
-Cuando haya dominio: añadir el despliegue de `main` (Cloudflare Workers con Static Assets,
-como `chantal_verdugo_house`), construido con `SITE_URL=<dominio> BASE_PATH=/`.
+`deploy-pages.yml` se dispara con `workflow_run`, que solo lee el workflow de la rama por
+defecto (`main`) y corre en su contexto: **un cambio en `deploy-pages.yml` no surte efecto hasta
+que llega a `main`**, y el entorno `github-pages` tiene que seguir admitiendo `main`.
+
+Si algún día hay dominio y producción: añadir el despliegue de `main` (Cloudflare Workers con
+Static Assets, como `chantal_verdugo_house`), construido con `SITE_URL=<dominio> BASE_PATH=/`, y
+quitar `NOINDEX_SITE` de lo que se publique como web real.
