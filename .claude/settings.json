@@ -5,19 +5,19 @@
       "Bash(npm run build)",
       "Bash(npm run dev)",
       "Bash(npm run preview)",
+      "Bash(npm run lint)",
+      "Bash(npm run format:check)",
+      "Bash(npm run test:e2e)",
       "Bash(npm ci)",
-      "Bash(npx astro:*)",
-      "Bash(git status:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git show:*)",
-      "Bash(git branch:*)",
+      "Bash(git status)",
+      "Bash(git branch)",
+      "Bash(git branch -a)",
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
       "Bash(gh pr view:*)",
       "WebFetch(domain:docs.astro.build)",
       "WebFetch(domain:tailwindcss.com)",
-      "WebFetch(domain:developers.cloudflare.com)"
+      "WebFetch(domain:daisyui.com)"
     ],
     "deny": ["Read(./.env)", "Read(./.env.*)"]
   }
