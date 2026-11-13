@@ -1,0 +1,42 @@
+name: CI
+
+# Corre en cada pull request y en cada push a cualquier rama, develop incluida. Cuando
+# termina en verde sobre develop, deploy-pages.yml publica esa rama en GitHub Pages.
+on:
+  pull_request:
+  push:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Formato
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tipos
+        run: npm run check
+
+      - name: Instalar navegador de Playwright
+        run: npx playwright install --with-deps chromium
+
+      # test:e2e construye con los defaults de astro.config.mjs (base /ikaika-salud/, el que
+      # ejercita withBase() en los enlaces internos) y levanta/para el preview de Astro
+      # alrededor de los tests.
+      - name: Build y tests e2e
+        run: npm run test:e2e

@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import { nombreSitio, descripcionSitio } from '../lib/sitio';
+---
+
+<Base title={nombreSitio} description={descripcionSitio}>
+  <main id="main" class="hero min-h-dvh">
+    <div class="hero-content max-w-2xl text-center">
+      <div>
+        <p class="text-primary text-sm font-semibold tracking-widest uppercase">{nombreSitio}</p>
+        <h1 class="mt-4 text-4xl font-bold text-balance sm:text-5xl">Web en construcción</h1>
+        <p class="text-base-content/80 mt-6 text-lg text-pretty">
+          Estamos preparando la página. Muy pronto podrás conocer todo lo que hacemos.
+        </p>
+      </div>
+    </div>
+  </main>
+</Base>

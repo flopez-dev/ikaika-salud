@@ -1,0 +1,28 @@
+# Actualizaciones semanales de dependencias y de las acciones de los workflows, contra
+# `develop` a propósito: los cambios pasan por develop (y su copia en GitHub Pages) antes de
+# llegar a `main`, igual que cualquier otro cambio.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      astro:
+        patterns: ['astro', '@astrojs/*']
+      lint-y-formato:
+        patterns: ['eslint*', '@eslint/*', '@typescript-eslint/*', 'prettier*', 'typescript']
+      tailwind-y-daisyui:
+        patterns: ['tailwindcss', '@tailwindcss/*', 'daisyui']
+    ignore:
+      # @astrojs/check todavía no admite TypeScript 7.
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly

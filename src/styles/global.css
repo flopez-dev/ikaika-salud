@@ -1,0 +1,59 @@
+@import 'tailwindcss';
+
+/* daisyUI 5 como librería de componentes (btn, card, navbar, footer…): se usan sus clases en
+   vez de componentes hechos a mano. Solo el tema propio; no se cargan los temas de serie. */
+@plugin 'daisyui' {
+  themes: false;
+}
+
+/* Tema provisional de Ikaika Salud hasta tener la marca: verdes y arena tranquilos, propios
+   de salud. Cuando llegue la paleta real se cambian aquí los valores, no los nombres
+   (primary, secondary…), que es lo que leen los componentes. */
+@plugin 'daisyui/theme' {
+  name: 'ikaika';
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: oklch(99% 0.005 150);
+  --color-base-200: oklch(96% 0.01 150);
+  --color-base-300: oklch(91% 0.015 150);
+  --color-base-content: oklch(24% 0.02 170);
+  --color-primary: oklch(48% 0.09 170);
+  --color-primary-content: oklch(98% 0.01 170);
+  --color-secondary: oklch(72% 0.08 70);
+  --color-secondary-content: oklch(24% 0.03 70);
+  --color-accent: oklch(62% 0.12 30);
+  --color-accent-content: oklch(98% 0.01 30);
+  --color-neutral: oklch(30% 0.02 170);
+  --color-neutral-content: oklch(96% 0.01 170);
+  --color-info: oklch(60% 0.12 240);
+  --color-info-content: oklch(98% 0.01 240);
+  --color-success: oklch(58% 0.12 150);
+  --color-success-content: oklch(98% 0.01 150);
+  --color-warning: oklch(78% 0.14 80);
+  --color-warning-content: oklch(25% 0.04 80);
+  --color-error: oklch(58% 0.18 25);
+  --color-error-content: oklch(98% 0.01 25);
+
+  --radius-selector: 1rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
