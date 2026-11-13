@@ -52,8 +52,8 @@ Ahora mismo es solo el esqueleto: una home «Web en construcción» y una 404. F
 ## Ramas y despliegue
 
 **De momento el sitio vive solo en `develop`** (decidido el 2026-11-13): la copia de GitHub
-Pages es la web, no hay producción ni dominio propio. `main` existe pero no se usa: no se
-integra nada en ella ni se despliega.
+Pages es la web, no hay producción ni dominio propio. `develop` es la **rama por defecto** del
+repo; `main` existe pero no se usa: no se integra nada en ella ni se despliega.
 
 | Rama / evento | Destino                                                                   |
 | :------------ | :------------------------------------------------------------------------ |
@@ -64,10 +64,11 @@ Se trabaja en ramas que salen de `develop` y se integran en `develop`. El repo e
 eso Pages sirve en el plan Free. `.github/dependabot.yml` abre cada semana PR de dependencias y
 acciones **contra `develop`**.
 
-`deploy-pages.yml` se dispara con `workflow_run`, que solo lee el workflow de la rama por
-defecto (`main`) y corre en su contexto: **un cambio en `deploy-pages.yml` no surte efecto hasta
-que llega a `main`**, y el entorno `github-pages` tiene que seguir admitiendo `main`.
+`deploy-pages.yml` se dispara con `workflow_run`, que lee el workflow de la rama por defecto y
+corre en su contexto. Por eso `develop` es la rama por defecto y el entorno `github-pages` solo
+admite `develop`; si se vuelve a poner `main` por defecto, hay que admitir `main` en el entorno
+(si no, el deploy falla con «Branch "main" is not allowed to deploy»).
 
 Si algún día hay dominio y producción: añadir el despliegue de `main` (Cloudflare Workers con
 Static Assets, como `chantal_verdugo_house`), construido con `SITE_URL=<dominio> BASE_PATH=/`, y
-quitar `NOINDEX_SITE` de lo que se publique como web real.
+replantear qué rama es la de por defecto.

@@ -26,8 +26,8 @@ jobs:
   deploy:
     # workflow_run también salta con el CI de un PR cuya rama se llame develop (p. ej. desde un
     # fork): se exige que sea el CI de un push, además de que haya pasado. A mano, solo desde
-    # develop. Ojo: con workflow_run el job corre en el contexto de main (la rama por defecto),
-    # así que el entorno github-pages admite main y develop; lo que se publica es head_sha.
+    # develop. Con workflow_run el job corre en el contexto de la rama por defecto, que es
+    # develop: por eso el entorno github-pages solo admite develop.
     if: >-
       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/develop') ||
       (github.event.workflow_run.conclusion == 'success' &&
