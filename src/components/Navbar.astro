@@ -1,0 +1,137 @@
+---
+/**
+ * Cabecera como la de ikaikasalud.es: logo, menú (con el submenú de Servicios), redes y botón
+ * «Contáctanos». Aquí todo son anclas de esta misma página. En móvil, el menú entero va en
+ * un desplegable. Los <details> funcionan sin JS; el script solo los cierra al elegir.
+ */
+import Icono from './Icono.astro';
+import { contacto } from '../lib/contacto';
+import { menuServicios } from '../lib/recorrido';
+import { withBase } from '../lib/withBase';
+
+const enlaces = [
+  { texto: 'Instalaciones', href: '#recorrido' },
+  { texto: 'Nosotras', href: '#nosotras' },
+  { texto: 'Cómo llegar', href: '#contacto' },
+];
+---
+
+<header class="bg-base-100 border-base-300 fixed inset-x-0 top-0 z-40 border-b">
+  <nav
+    aria-label="Principal"
+    class="navbar mx-auto min-h-16 max-w-6xl gap-2 px-4 py-2 lg:px-6"
+    data-menu
+  >
+    <a href="#main" class="shrink-0" aria-label="Ikaika Salud, inicio">
+      <img
+        src={withBase('/original/logo.webp')}
+        alt="Clínica Ikaika Salud logo"
+        width="480"
+        height="172"
+        class="h-9 w-auto"
+      />
+    </a>
+
+    <ul class="menu menu-horizontal ms-6 hidden flex-nowrap items-center gap-1 px-0 lg:flex">
+      <li>
+        <a href="#main" class="font-light">
+          Inicio
+        </a>
+      </li>
+      <li>
+        <details>
+          <summary class="font-light">Servicios</summary>
+          <ul class="bg-base-100 rounded-box z-10 w-72 p-2 shadow-lg">
+            {menuServicios.map((s) => (
+              <li>
+                <a href={s.href} class="font-light">
+                  {s.texto}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      </li>
+      {enlaces.map((e) => (
+        <li>
+          <a href={e.href} class="font-light">
+            {e.texto}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <div class="ms-auto flex items-center gap-1">
+      <a
+        class="btn btn-ghost btn-sm btn-circle hidden sm:inline-flex"
+        href={contacto.instagram}
+        target="_blank"
+        rel="noopener"
+        aria-label="Instagram de Ikaika Salud"
+      >
+        <Icono nombre="instagram-logo" />
+      </a>
+      <a
+        class="btn btn-ghost btn-sm btn-circle hidden sm:inline-flex"
+        href={contacto.facebook}
+        target="_blank"
+        rel="noopener"
+        aria-label="Facebook de Ikaika Salud"
+      >
+        <Icono nombre="facebook-logo" />
+      </a>
+      <a
+        href="#solicita-informacion"
+        class="btn btn-primary ms-2 hidden px-8 font-normal sm:inline-flex"
+      >
+        Contáctanos
+      </a>
+
+      <details class="dropdown dropdown-end lg:hidden">
+        <summary class="btn btn-ghost btn-circle" aria-label="Abrir el menú">
+          <Icono nombre="list" class="size-6" />
+        </summary>
+        <ul class="menu dropdown-content bg-base-100 rounded-box z-10 mt-3 w-72 p-2 shadow-lg">
+          <li>
+            <a href="#main">Inicio</a>
+          </li>
+          <li>
+            <span class="menu-title">Servicios</span>
+            <ul>
+              {menuServicios.map((s) => (
+                <li>
+                  <a href={s.href}>{s.texto}</a>
+                </li>
+              ))}
+            </ul>
+          </li>
+          {enlaces.map((e) => (
+            <li>
+              <a href={e.href}>{e.texto}</a>
+            </li>
+          ))}
+          <li class="mt-2">
+            <a href="#solicita-informacion" class="btn btn-primary font-normal">
+              Contáctanos
+            </a>
+          </li>
+        </ul>
+      </details>
+    </div>
+  </nav>
+</header>
+
+<script>
+  // Cierra los desplegables al elegir una opción o al pulsar fuera.
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  if (menu) {
+    const cerrar = () =>
+      menu.querySelectorAll('details[open]').forEach((d) => d.removeAttribute('open'));
+    menu.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) cerrar();
+    });
+    document.addEventListener('click', (e) => {
+      if (!menu.contains(e.target as Node)) cerrar();
+    });
+  }
+</script>

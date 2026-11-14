@@ -1,0 +1,49 @@
+---
+/**
+ * Icono de Phosphor (peso regular) en línea, para heredar `currentColor` y no pedir nada más
+ * por red. Decorativo: si el icono es el único contenido de un enlace, el texto accesible va
+ * en el enlace (`aria-label`). Para añadir uno, impórtalo abajo y súmalo a `svgs`.
+ */
+import whatsapp from '@phosphor-icons/core/regular/whatsapp-logo.svg?raw';
+import phone from '@phosphor-icons/core/regular/phone.svg?raw';
+import mapPin from '@phosphor-icons/core/regular/map-pin.svg?raw';
+import clock from '@phosphor-icons/core/regular/clock.svg?raw';
+import envelope from '@phosphor-icons/core/regular/envelope-simple.svg?raw';
+import check from '@phosphor-icons/core/regular/check-circle.svg?raw';
+import instagram from '@phosphor-icons/core/regular/instagram-logo.svg?raw';
+import facebook from '@phosphor-icons/core/regular/facebook-logo.svg?raw';
+import arrowDown from '@phosphor-icons/core/regular/arrow-down.svg?raw';
+import car from '@phosphor-icons/core/regular/car.svg?raw';
+import list from '@phosphor-icons/core/regular/list.svg?raw';
+import caretDown from '@phosphor-icons/core/regular/caret-down.svg?raw';
+import whatsappFill from '@phosphor-icons/core/fill/whatsapp-logo-fill.svg?raw';
+
+const svgs = {
+  'whatsapp-logo': whatsapp,
+  phone,
+  'map-pin': mapPin,
+  clock,
+  'envelope-simple': envelope,
+  'check-circle': check,
+  'instagram-logo': instagram,
+  'facebook-logo': facebook,
+  'arrow-down': arrowDown,
+  car,
+  list,
+  'caret-down': caretDown,
+  'whatsapp-logo-fill': whatsappFill,
+};
+
+interface Props {
+  nombre: keyof typeof svgs;
+  class?: string;
+}
+
+const { nombre, class: clase = 'size-5' } = Astro.props;
+const svg = svgs[nombre].replace(
+  '<svg ',
+  `<svg class="${clase}" aria-hidden="true" focusable="false" `,
+);
+---
+
+<Fragment set:html={svg} />

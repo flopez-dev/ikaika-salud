@@ -1,0 +1,87 @@
+---
+/** Pie como el de ikaikasalud.es: gris oscuro, contacto, redes, horario, ubicación y legales. */
+import Icono from './Icono.astro';
+import { contacto, horario, legales } from '../lib/contacto';
+import { nombreSitio } from '../lib/sitio';
+
+const anio = new Date().getFullYear();
+---
+
+<footer class="bg-neutral text-neutral-content px-4 pt-16 pb-10">
+  <div class="mx-auto grid max-w-5xl gap-10 sm:grid-cols-3">
+    <div>
+      <p class="title-2 font-normal">{nombreSitio}</p>
+      <p class="body-6 mt-4">Servicios de salud y fisioterapia en Albacete.</p>
+      <p class="caption-3 mt-6 font-normal">Contacto</p>
+      <p class="body-6 mt-2">
+        <a class="link" href={contacto.telefonoHref}>
+          {contacto.telefono}
+        </a>
+      </p>
+      <p class="body-6 mt-1">
+        <a class="link" href={`mailto:${contacto.email}`}>
+          {contacto.email}
+        </a>
+      </p>
+    </div>
+    <div>
+      <div class="flex gap-1">
+        <a
+          class="btn btn-ghost btn-sm btn-circle text-neutral-content hover:bg-neutral-content/10"
+          href={contacto.instagram}
+          target="_blank"
+          rel="noopener"
+          aria-label="Instagram de Ikaika Salud"
+        >
+          <Icono nombre="instagram-logo" />
+        </a>
+        <a
+          class="btn btn-ghost btn-sm btn-circle text-neutral-content hover:bg-neutral-content/10"
+          href={contacto.facebook}
+          target="_blank"
+          rel="noopener"
+          aria-label="Facebook de Ikaika Salud"
+        >
+          <Icono nombre="facebook-logo" />
+        </a>
+      </div>
+      <p class="caption-3 mt-6 font-normal">Horario</p>
+      <dl class="body-6 mt-2 flex flex-col gap-2">
+        {horario.map((h) => (
+          <div>
+            <dt class="font-bold">{h.dias}:</dt>
+            <dd>{h.horas}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+    <div>
+      <p class="caption-3 font-normal">Ubicación</p>
+      <p class="body-6 mt-2 uppercase">{`${contacto.calle} (${contacto.ciudad})`}</p>
+    </div>
+  </div>
+  <div class="body-6 mx-auto mt-16 flex max-w-5xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <p>© {anio} Fisioterapia en Albacete | Clínica Ikaika Salud.</p>
+    <nav aria-label="Legal">
+      <ul class="flex flex-wrap gap-x-8 gap-y-2">
+        {legales.map((l) => (
+          <li>
+            <a class="link" href={l.href} rel="noopener">
+              {l.texto}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+<a
+  href={contacto.whatsappHref}
+  target="_blank"
+  rel="noopener"
+  aria-label="Escríbenos por WhatsApp"
+  class="btn btn-accent btn-circle fixed right-4 bottom-4 z-40 size-14 shadow-lg sm:right-6 sm:bottom-6"
+>
+  <Icono nombre="whatsapp-logo-fill" class="size-8" />
+</a>

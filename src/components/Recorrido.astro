@@ -1,0 +1,204 @@
+---
+/**
+ * Recorrido por la clínica controlado por el scroll. Una «escena» fija a pantalla completa
+ * (sticky) con la imagen del recorrido y el texto de la parada: a pantalla completa en móvil
+ * con el texto en una tarjeta abajo, en dos columnas en escritorio. La sección es alta
+ * (`ritmo` en src/lib/recorrido.ts) y `src/scripts/recorrido.ts` traduce cuánto se ha bajado
+ * en qué parada se está y qué fotograma toca.
+ *
+ * La imagen es una secuencia de fotogramas pintada en un <canvas> (no un vídeo): pintar un
+ * fotograma es instantáneo, así que el movimiento sigue al dedo sin tirones.
+ * Con movimiento reducido no se descarga la secuencia: se ve la foto de la parada.
+ * Sin JS, las paradas se ven una debajo de otra.
+ */
+import Icono from './Icono.astro';
+import { contacto } from '../lib/contacto';
+import { hero, paradas, duracionRecorrido, fotogramas, ritmo } from '../lib/recorrido';
+import { withBase } from '../lib/withBase';
+
+const fotos = [
+  {
+    src: '/recorrido/parada-1.webp',
+    alt: 'Fachada de Ikaika Salud, con la puerta en arco y el rótulo de la clínica',
+  },
+  { src: paradas[0].foto, alt: 'Recepción con paredes de madera, mostrador blanco y un banco' },
+  { src: paradas[1].foto, alt: 'Sala de tratamiento con camilla, silla y ventana con cortina' },
+  { src: paradas[2].foto, alt: 'Sala de tratamiento con camilla y lavabo' },
+  { src: paradas[3].foto, alt: 'Sala de ejercicio con el logotipo iluminado en la pared' },
+];
+
+const total = paradas.length + 1;
+const tramo = ritmo.lectura + ritmo.trayecto;
+// Cada parada dura un tramo (el de la última es el trayecto hasta el final de la secuencia),
+// más la altura de la propia escena fija.
+const alto = `${total * tramo + 100}vh`;
+// Ancla de cada parada, a mitad de su lectura, para los enlaces del menú.
+const ancla = (i: number) => `${i * tramo + ritmo.lectura * 0.3}vh`;
+
+const clasePanel =
+  'card bg-base-100/95 w-full max-w-xl shadow-lg backdrop-blur-md lg:bg-transparent lg:shadow-none lg:backdrop-blur-none';
+---
+
+<section
+  id="recorrido"
+  aria-label="Recorrido por la clínica"
+  class="recorrido relative"
+  style={`--alto-recorrido: ${alto}`}
+  data-recorrido
+  data-duracion={duracionRecorrido}
+  data-tiempos={JSON.stringify([0, ...paradas.map((p) => p.tiempo)])}
+  data-lectura={ritmo.lectura}
+  data-trayecto={ritmo.trayecto}
+  data-total={fotogramas.total}
+  data-fps={fotogramas.fps}
+  data-movil={withBase('/recorrido/m/')}
+  data-escritorio={withBase('/recorrido/d/')}
+>
+  {paradas.map((p, i) => (
+    <span id={p.id} class="absolute left-0" style={`top: ${ancla(i + 1)}`} aria-hidden="true" />
+  ))}
+
+  <div class="escena relative lg:grid lg:grid-cols-2">
+    <div class="absolute inset-0 lg:static lg:flex lg:items-center lg:justify-end lg:px-12 lg:pt-20 lg:pb-6">
+      <div
+        class="bg-base-300 relative size-full overflow-hidden lg:aspect-9/16 lg:h-full lg:w-auto lg:rounded-box lg:shadow-xl"
+        data-marco
+      >
+        {fotos.map((f, i) => (
+          <img
+            src={withBase(f.src)}
+            alt={f.alt}
+            width="720"
+            height="1280"
+            loading="eager"
+            decoding="async"
+            fetchpriority={i === 0 ? 'high' : 'low'}
+            class:list={[
+              'ease-suave absolute inset-0 z-10 size-full object-cover transition-opacity duration-400',
+              i === 0 ? 'opacity-100' : 'opacity-0',
+            ]}
+            data-foto
+          />
+        ))}
+        <canvas
+          class="ease-suave absolute inset-0 size-full opacity-0 transition-opacity duration-500"
+          aria-hidden="true"
+          data-lienzo
+        ></canvas>
+      </div>
+    </div>
+
+    <div class="paneles relative grid px-4 pt-24 pb-6 lg:items-center lg:px-12 xl:px-20">
+      <div class={clasePanel} data-panel>
+        <div class="card-body gap-4 p-6 lg:p-0">
+          <h1 class="heading-1">{hero.titulo}</h1>
+          {hero.textos.map((t) => (
+            <p class="body-6 lg:body-3 text-secondary max-w-[680px]">{t}</p>
+          ))}
+          <p class="body-3 flex items-center gap-2">
+            <Icono nombre="phone" class="size-5" />
+            <a href={contacto.telefonoHref} class="link link-hover">
+              {contacto.telefono}
+            </a>
+          </p>
+          <p class="body-6 text-secondary">
+            {contacto.calle} – {contacto.ciudad}
+          </p>
+          <div class="pt-1">
+            <a
+              href={contacto.whatsappHref}
+              class="btn btn-primary px-8 font-bold"
+              target="_blank"
+              rel="noopener"
+            >
+              Contáctanos por WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {paradas.map((p) => (
+        <div class={clasePanel} data-panel>
+          <div class="card-body gap-3 p-6 lg:p-0">
+            <p class="caption-3 text-secondary">{p.lugar}</p>
+            <h2 class="heading-3 lg:heading-2">{p.titulo}</h2>
+            {p.textos.map((t) => (
+              <p class="body-6 lg:body-3 text-secondary max-w-[680px]">{t}</p>
+            ))}
+            {p.enlaces.length > 0 && (
+              <div class="flex flex-wrap gap-2 pt-2">
+                {p.enlaces.map((e) => (
+                  <a href={e.href} class="btn btn-primary btn-sm rounded-md px-4 font-normal">
+                    {e.texto}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Con JS: sección alta, escena fija a pantalla completa y un solo panel visible a la vez,
+     superpuestos en la misma celda (la tarjeta abajo en móvil, centrada en escritorio). */
+  :global(.js) .recorrido {
+    height: var(--alto-recorrido);
+  }
+  :global(.js) .escena {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    overflow: hidden;
+  }
+  :global(.js) .paneles {
+    position: absolute;
+    inset: auto 0 0 0;
+  }
+  @media (min-width: 64rem) {
+    :global(.js) .paneles {
+      position: relative;
+      inset: auto;
+      height: 100dvh;
+    }
+  }
+  :global(.js) [data-panel] {
+    grid-area: 1 / 1;
+    align-self: end;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(1.5rem);
+    transition:
+      opacity 0.6s var(--ease-suave),
+      transform 0.6s var(--ease-suave),
+      visibility 0s linear 0.6s;
+  }
+  @media (min-width: 64rem) {
+    :global(.js) [data-panel] {
+      align-self: center;
+    }
+  }
+  :global(.js) [data-panel][data-activo] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+  /* Sin JS: paneles uno debajo de otro, sobre la foto de la fachada. */
+  :global(html:not(.js)) [data-panel] + [data-panel] {
+    margin-top: 1rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) [data-panel] {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  import { iniciarRecorrido } from '../scripts/recorrido';
+  const raiz = document.querySelector<HTMLElement>('[data-recorrido]');
+  if (raiz) iniciarRecorrido(raiz);
+</script>

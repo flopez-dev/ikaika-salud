@@ -1,0 +1,45 @@
+---
+/** «Nuestros Servicios», como en ikaikasalud.es: las 7 tarjetas con sus ilustraciones. */
+import { servicios, serviciosIntro } from '../lib/recorrido';
+import { withBase } from '../lib/withBase';
+---
+
+<section id="servicios" class="px-4 py-20" aria-labelledby="servicios-titulo">
+  <div class="mx-auto max-w-6xl">
+    <h2 id="servicios-titulo" class="heading-2 text-center">
+      Nuestros Servicios
+    </h2>
+    <p class="body-6 text-secondary mx-auto mt-4 max-w-3xl text-center">{serviciosIntro}</p>
+    <ul class="mt-12 grid gap-8 md:grid-cols-2">
+      {servicios.map((s, i) => (
+        <li
+          id={s.id}
+          class:list={[
+            'card bg-base-100 scroll-mt-24',
+            i === servicios.length - 1 &&
+              servicios.length % 2 === 1 &&
+              'md:col-span-2 md:mx-auto md:w-1/2',
+          ]}
+        >
+          <figure class="bg-base-200 rounded-box aspect-2/1 overflow-hidden">
+            <img
+              src={withBase(s.imagen)}
+              alt={s.alt}
+              width="646"
+              height="646"
+              loading="lazy"
+              decoding="async"
+              class="size-full object-cover"
+            />
+          </figure>
+          <div class="card-body items-center gap-3 px-6 pt-6 pb-2 text-center">
+            <h3 class="heading-5">{s.titulo}</h3>
+            {s.textos.map((t) => (
+              <p class="body-6 text-secondary max-w-md">{t}</p>
+            ))}
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

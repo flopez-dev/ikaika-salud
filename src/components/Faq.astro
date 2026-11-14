@@ -1,0 +1,30 @@
+---
+import { preguntas } from '../lib/recorrido';
+---
+
+<section id="preguntas" class="bg-base-200 px-4 py-20" aria-labelledby="preguntas-titulo">
+  <div class="mx-auto max-w-4xl">
+    <h2 id="preguntas-titulo" class="heading-2">
+      Preguntas frecuentes
+    </h2>
+    <div class="mt-10 flex flex-col gap-2">
+      {preguntas.map((q) => (
+        <details class="collapse-plus bg-base-100 collapse">
+          <summary class="collapse-title body-3 pe-12">{q.pregunta}</summary>
+          <div class="collapse-content body-6 text-secondary flex flex-col gap-2">
+            {q.respuesta.map((r) => (
+              <p>{r}</p>
+            ))}
+            {q.lista && (
+              <ul class="list-disc space-y-1 ps-5">
+                {q.lista.map((l) => (
+                  <li>{l}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>

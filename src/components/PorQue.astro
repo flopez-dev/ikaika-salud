@@ -1,0 +1,45 @@
+---
+import { contacto } from '../lib/contacto';
+import { porQue } from '../lib/recorrido';
+import { withBase } from '../lib/withBase';
+---
+
+<section id="por-que" class="px-4 py-20" aria-labelledby="por-que-titulo">
+  <div class="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2">
+    <div>
+      <h2 id="por-que-titulo" class="heading-2">
+        ¿Por qué elegirnos?
+      </h2>
+      {porQue.intro.map((t) => (
+        <p class="body-6 mt-6">{t}</p>
+      ))}
+      <ul class="body-6 mt-4 list-disc space-y-2 ps-5">
+        {porQue.motivos.map((m) => (
+          <li>{m}</li>
+        ))}
+      </ul>
+      <p class="body-6 mt-6">
+        {porQue.cierre[0]}
+        <br />
+        {porQue.cierre[1]}
+      </p>
+      <a
+        href={contacto.whatsappHref}
+        class="btn btn-primary mt-6 px-10 font-normal"
+        target="_blank"
+        rel="noopener"
+      >
+        Contáctanos por WhatsApp
+      </a>
+    </div>
+    <img
+      src={withBase('/original/sandra-nadia.webp')}
+      alt="Sandra y Nadia, fisioterapeutas en Albacete de Ikaika Salud."
+      width="768"
+      height="1024"
+      loading="lazy"
+      decoding="async"
+      class="rounded-box mx-auto w-full max-w-md object-cover"
+    />
+  </div>
+</section>

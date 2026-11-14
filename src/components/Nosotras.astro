@@ -1,0 +1,40 @@
+---
+import { equipo, nosotras } from '../lib/recorrido';
+import { withBase } from '../lib/withBase';
+---
+
+<section id="nosotras" class="px-4 py-20" aria-labelledby="nosotras-titulo">
+  <div class="mx-auto max-w-6xl">
+    <h2 id="nosotras-titulo" class="heading-2 text-center uppercase">
+      Nosotras
+    </h2>
+    <div class="mt-12 grid items-start gap-10 lg:grid-cols-2">
+      <div class="flex flex-col gap-6">
+        {nosotras.map((b) => (
+          <div>
+            <h3 class="body-6 font-bold">{b.titulo}</h3>
+            <p class="body-6 text-secondary mt-1 text-justify">{b.texto}</p>
+          </div>
+        ))}
+        <ul class="grid gap-4 sm:grid-cols-2">
+          {equipo.map((p) => (
+            <li class="bg-base-200 rounded-box p-5">
+              <p class="title-2">{p.nombre}</p>
+              <p class="body-6 text-primary mt-1 font-bold">{p.papel}</p>
+              <p class="body-6 text-secondary mt-2">{p.formacion}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <img
+        src={withBase('/original/rotulo.webp')}
+        alt="Letrero de la clínica Ikaika Salud en Albacete."
+        width="768"
+        height="760"
+        loading="lazy"
+        decoding="async"
+        class="rounded-box w-full object-cover"
+      />
+    </div>
+  </div>
+</section>

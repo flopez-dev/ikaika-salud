@@ -1,0 +1,111 @@
+---
+/**
+ * «Solicita información», como en ikaikasalud.es. Prototipo: el formulario no envía nada
+ * (GitHub Pages no tiene servidor). Al enviarlo, valida y avisa de que es una demostración.
+ */
+import { contacto, legales } from '../lib/contacto';
+import { solicitaInformacion } from '../lib/recorrido';
+
+const privacidad = legales.find((l) => l.texto === 'Política de privacidad')!;
+const claseCampo = 'input w-full rounded-lg';
+---
+
+<section id="solicita-informacion" class="px-4 py-20" aria-labelledby="solicita-titulo">
+  <div class="mx-auto grid max-w-5xl items-start gap-12 lg:grid-cols-2">
+    <div class="lg:pt-16">
+      <h2 id="solicita-titulo" class="heading-2">
+        Solicita información
+      </h2>
+      <p class="body-6 text-secondary mt-6 max-w-md">{solicitaInformacion}</p>
+      <h3 class="body-6 mt-8 font-bold">Soporte</h3>
+      <a class="link link-hover body-6 text-secondary" href={`mailto:${contacto.email}`}>
+        {contacto.email}
+      </a>
+      <h3 class="body-6 mt-6 font-bold">Teléfono</h3>
+      <a class="link body-6 text-secondary" href={contacto.telefonoHref}>
+        {contacto.telefono}
+      </a>
+    </div>
+
+    <form class="flex flex-col gap-4" data-formulario novalidate>
+      <p class="body-6 text-secondary">
+        Al enviar este formulario, acepto la{' '}
+        <a class="link" href={privacidad.href} target="_blank" rel="noopener">
+          Política de Privacidad
+        </a>{' '}
+        de Ikaika Salud y consiento el tratamiento de mis datos, incluidos los de salud, para
+        gestionar consultas, reservas y prestación de servicios sanitarios.
+      </p>
+      <label class="flex flex-col gap-1">
+        <span class="body-6 text-secondary">Nombre completo del paciente</span>
+        <input
+          class={claseCampo}
+          name="nombre"
+          autocomplete="name"
+          placeholder="Escribe tu nombre completo aquí"
+        />
+      </label>
+      <label class="flex flex-col gap-1">
+        <span class="body-6 text-secondary">Correo electrónico de contacto*</span>
+        <input
+          class={claseCampo}
+          name="email"
+          type="email"
+          required
+          autocomplete="email"
+          placeholder="Escribe tu correo electrónico aquí"
+        />
+      </label>
+      <label class="flex flex-col gap-1">
+        <span class="body-6 text-secondary">Consulta o mensaje para nosotros*</span>
+        <textarea
+          class="textarea h-28 w-full rounded-lg"
+          name="mensaje"
+          required
+          placeholder="Escribe su teléfono y su consulta aquí"
+        ></textarea>
+      </label>
+      <label class="flex flex-col gap-1">
+        <span class="body-6 text-secondary">Teléfono</span>
+        <input
+          class={claseCampo}
+          name="telefono"
+          type="tel"
+          autocomplete="tel"
+          placeholder="Respuesta corta"
+        />
+      </label>
+      <p class="body-6 text-error" data-error hidden></p>
+      <div>
+        <button type="submit" class="btn btn-primary px-10 font-normal">
+          Enviar consulta ahora
+        </button>
+      </div>
+      <p class="alert alert-soft body-6" role="status" data-aviso hidden>
+        Esto es un prototipo: el formulario todavía no envía la consulta. Mientras tanto, escríbenos
+        por WhatsApp o llámanos al {contacto.telefono}.
+      </p>
+    </form>
+  </div>
+</section>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-formulario]');
+  if (form) {
+    const error = form.querySelector<HTMLElement>('[data-error]')!;
+    const aviso = form.querySelector<HTMLElement>('[data-aviso]')!;
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      aviso.hidden = true;
+      const email = form.elements.namedItem('email') as HTMLInputElement;
+      const mensaje = form.elements.namedItem('mensaje') as HTMLTextAreaElement;
+      let texto = '';
+      if (!email.value.trim()) texto = 'Escribe tu correo electrónico.';
+      else if (!email.validity.valid) texto = 'El correo electrónico no es válido.';
+      else if (!mensaje.value.trim()) texto = 'Escribe tu consulta o mensaje.';
+      error.textContent = texto;
+      error.hidden = !texto;
+      if (!texto) aviso.hidden = false;
+    });
+  }
+</script>
