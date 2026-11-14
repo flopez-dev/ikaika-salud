@@ -12,7 +12,9 @@
  * a medias. En táctil la imagen va pegada al scroll; con rueda, un suavizado corto por tiempo
  * reparte cada golpe de rueda.
  *
- * Imagen: secuencia de fotogramas WebP pintada en un <canvas>. Entre el fotograma n y el n+1
+ * Imagen: en móvil, la secuencia en `m.mp4` puesta en un <video> (servido como Blob); en
+ * escritorio, fotogramas WebP pintados en un <canvas>, que también es el respaldo del móvil.
+ * Canvas: entre el fotograma n y el n+1
  * se pinta n y encima n+1 con opacidad proporcional, así que con scroll lento no se nota el
  * paso de uno a otro. Se cargan primero 1 de cada 8 fotogramas (el recorrido funciona casi en
  * seguida) y luego el resto, empezando por los más cercanos a donde está el visitante; si
@@ -32,6 +34,8 @@ const CONSULTA_MOVIL = '(max-width: 1023px)';
 const TAU_RUEDA = 70;
 /** Peticiones de fotogramas simultáneas. */
 const PARALELO = 6;
+/** Tiempo máximo para bajar el vídeo móvil antes de caer a la secuencia de imágenes (ms). */
+const TIMEOUT_VIDEO = 20_000;
 /** Primera pasada de carga: 1 de cada N fotogramas. */
 const SALTO_INICIAL = 8;
 /** Fracción del trayecto en la que la cámara acelera (al salir) y frena (al llegar). */
@@ -70,11 +74,12 @@ export function iniciarRecorrido(raiz: HTMLElement): void {
   const marco = raiz.querySelector<HTMLElement>('[data-marco]');
   const zoom = raiz.querySelector<HTMLElement>('[data-zoom]');
   const lienzo = raiz.querySelector<HTMLCanvasElement>('[data-lienzo]');
+  const video = raiz.querySelector<HTMLVideoElement>('[data-video]');
   const pista = raiz.querySelector<HTMLElement>('[data-pista]');
   const paneles = [...raiz.querySelectorAll<HTMLElement>('[data-panel]')];
   const fotos = [...raiz.querySelectorAll<HTMLImageElement>('[data-foto]')];
   const ctx = lienzo?.getContext('2d');
-  if (!escena || !marco || !zoom || !lienzo || !ctx || paneles.length === 0) return;
+  if (!escena || !marco || !zoom || !lienzo || !ctx || !video || paneles.length === 0) return;
 
   const reducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const movil = window.matchMedia(CONSULTA_MOVIL);
@@ -243,6 +248,95 @@ export function iniciarRecorrido(raiz: HTMLElement): void {
     return -1;
   };
 
+  // ---------- vídeo en móvil: la misma secuencia como <video>, servido como Blob ----------
+  // Un Blob siempre es buscable; con GOP 4 y un seek por vez, el scrub va fluido en el móvil.
+  let modoVideo = false;
+  let enCanvas = false;
+  let tocado = false;
+  /** Último instante con imagen: pedir justo `duration` puede dejar el vídeo en negro. */
+  const finVideo = (total - 1) / fps;
+  const marcarListo = (el: HTMLElement) => {
+    listo = true;
+    el.classList.replace('opacity-0', 'opacity-100');
+    raiz.dataset.listo = '';
+  };
+  /** Pide el instante `t` solo cuando el seek anterior ha terminado (no se acumulan). */
+  const sincronizarVideo = (t: number) => {
+    const destino = Math.min(t, finVideo);
+    if (video.seeking || Math.abs(video.currentTime - destino) < 0.5 / fps) return;
+    video.currentTime = destino;
+  };
+  /** iOS no pinta un fotograma buscado hasta que el vídeo se ha reproducido una vez. */
+  const primar = () => {
+    if (video.readyState < 1) return;
+    video
+      .play()
+      .then(() => video.pause())
+      .catch(() => {});
+  };
+  const alPrimerToque = () => {
+    if (tocado) return;
+    tocado = true;
+    primar();
+  };
+  window.addEventListener('touchstart', alPrimerToque, { once: true, passive: true });
+  window.addEventListener('pointerdown', alPrimerToque, { once: true, passive: true });
+  video.addEventListener('seeked', () => {
+    raiz.dataset.fotograma = String(Math.round(video.currentTime * fps));
+    // La foto de la parada hace de póster hasta que el vídeo ha pintado un fotograma de
+    // verdad (el primer seek terminado), para no enseñar un vídeo en blanco en iOS.
+    if (modoVideo && !listo) marcarListo(video);
+    despertar();
+  });
+  const pasarACanvas = () => {
+    if (enCanvas) return;
+    enCanvas = true;
+    modoVideo = false;
+    listo = false;
+    video.classList.replace('opacity-100', 'opacity-0');
+    video.removeAttribute('src');
+    raiz.removeAttribute('data-listo');
+    bombear();
+  };
+  const cargarVideo = (url: string) => {
+    const control = new AbortController();
+    const aviso = setTimeout(() => control.abort(), TIMEOUT_VIDEO);
+    fetch(url, { signal: control.signal })
+      .then((r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        return r.blob();
+      })
+      .then((blob) => {
+        clearTimeout(aviso);
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = 'auto';
+        video.addEventListener(
+          'loadedmetadata',
+          () => {
+            modoVideo = true;
+            // Un primer seek al punto actual: su `seeked` revela el vídeo.
+            video.currentTime = Math.min(actual, finVideo);
+            despertar();
+          },
+          { once: true },
+        );
+        video.addEventListener(
+          'loadeddata',
+          () => {
+            if (tocado) primar();
+          },
+          { once: true },
+        );
+        video.addEventListener('error', pasarACanvas, { once: true });
+        video.src = URL.createObjectURL(blob);
+      })
+      .catch(() => {
+        clearTimeout(aviso);
+        pasarACanvas();
+      });
+  };
+
   const bombear = () => {
     while (enCurso < PARALELO) {
       const k = siguiente();
@@ -298,11 +392,8 @@ export function iniciarRecorrido(raiz: HTMLElement): void {
     ultimo = clave;
     pintar(imagenes[a]!, 1);
     if (b >= 0) pintar(imagenes[b]!, mezcla);
-    lienzo.dataset.fotograma = String(a);
-    if (!listo) {
-      listo = true;
-      lienzo.classList.replace('opacity-0', 'opacity-100');
-    }
+    raiz.dataset.fotograma = String(a);
+    if (!listo) marcarListo(lienzo);
   };
 
   // ---------- bucle: solo corre con la sección en pantalla ----------
@@ -327,7 +418,8 @@ export function iniciarRecorrido(raiz: HTMLElement): void {
       if (Math.abs(t - actual) < 0.001) actual = t;
     }
     antes = actual === t ? 0 : ahora;
-    dibujar();
+    if (modoVideo) sincronizarVideo(actual);
+    else dibujar();
     if (actual !== t) pendiente = requestAnimationFrame(paso);
   };
   function despertar() {
@@ -356,5 +448,8 @@ export function iniciarRecorrido(raiz: HTMLElement): void {
   medir();
   actual = tiempoPara(posicion(window.scrollY));
   despertar();
-  if (!reducido && base) bombear();
+  if (reducido) return;
+  // En móvil se baja el vídeo; la secuencia de imágenes solo si el vídeo falla.
+  if (movil.matches && raiz.dataset.videoMovil) cargarVideo(raiz.dataset.videoMovil);
+  else bombear();
 }

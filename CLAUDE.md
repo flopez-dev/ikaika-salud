@@ -38,10 +38,12 @@ como `{{marcador}}`.
   móvil que en escritorio. Todo lo que se mueve (texto que entra escalonado y sale, fundido
   foto ↔ secuencia, acercamiento) se calcula de la posición del scroll en cada fotograma, sin
   transiciones CSS por tiempo; en táctil la imagen va pegada al dedo (sin suavizado). En móvil
-  el texto va sobre la imagen con un velo `neutral`, sin tarjeta. La imagen es una
-  secuencia WebP pintada en `<canvas>`, mezclando fotogramas vecinos; no es un `<video>`
-  porque buscar en un vídeo con `currentTime` va a tirones. Con movimiento reducido no
-  descarga la secuencia y enseña la foto de la parada.
+  el texto va sobre la imagen con un velo `neutral`, sin tarjeta. En móvil la imagen es
+  `public/recorrido/m.mp4` (540×960, GOP 4) servido como Blob y puesto con `currentTime`, con
+  un solo seek pendiente a la vez; si falla o tarda más de 20 s, cae a la secuencia WebP
+  pintada en `<canvas>`, que es la de escritorio. Con movimiento reducido no descarga nada y
+  enseña la foto de la parada. Si cambia el montaje, regenerar también `m.mp4` desde
+  `recorrido_master.mp4` (ffmpeg: `scale=540:-2`, `-crf 23`, `-g 4`, `-movflags +faststart`).
 - `src/lib/` — datos fuera del marcado: `sitio.ts`, `contacto.ts` (teléfono, WhatsApp,
   horario, legales), `recorrido.ts` (paradas con su segundo del recorrido, `ritmo` del
   scroll por dispositivo, `fotogramas`, motivos, equipo, FAQ) y `withBase.ts`.

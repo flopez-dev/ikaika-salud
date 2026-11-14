@@ -37,10 +37,11 @@ test('el recorrido avanza con el scroll, se para en cada parada y vuelve atrás 
   page,
 }) => {
   await page.goto('');
-  const lienzo = page.locator('[data-lienzo]');
-  // El canvas sustituye a la foto en cuanto pinta su primer fotograma.
-  await expect(lienzo).toHaveClass(/opacity-100/, { timeout: 15_000 });
-  const fotograma = () => lienzo.evaluate((c) => Number(c.dataset.fotograma ?? -1));
+  const recorrido = page.locator('[data-recorrido]');
+  // La secuencia (vídeo en móvil, canvas en escritorio) sustituye a la foto al pintar su primer
+  // fotograma; el contenedor lo marca con `data-listo` y lleva el fotograma actual.
+  await expect(recorrido).toHaveAttribute('data-listo', '', { timeout: 15_000 });
+  const fotograma = () => recorrido.evaluate((r) => Number(r.dataset.fotograma ?? -1));
 
   // Al bajar a mitad de la sección, la cámara ha avanzado y hay otro panel activo.
   const mitad = await page.evaluate(() => {

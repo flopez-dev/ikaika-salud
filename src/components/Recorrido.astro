@@ -6,8 +6,8 @@
  * src/lib/recorrido.ts, distinto en móvil y en escritorio) y `src/scripts/recorrido.ts`
  * traduce cuánto se ha bajado en qué fotograma toca y cuánto se ve cada texto y cada foto.
  *
- * La imagen es una secuencia de fotogramas pintada en un <canvas> (no un vídeo): pintar un
- * fotograma es instantáneo, así que el movimiento sigue al dedo sin tirones.
+ * La imagen es una secuencia de fotogramas: en móvil, un <video> servido como Blob (buscable,
+ * con GOP corto); en escritorio, pintada en un <canvas>. Si el vídeo falla, cae al canvas.
  * Con movimiento reducido no se descarga la secuencia: se ve la foto de la parada.
  * Sin JS, las paradas se ven una debajo de otra.
  */
@@ -54,6 +54,7 @@ const claseTextoSecundario = 'text-neutral-content/90 lg:text-secondary';
   data-fps={fotogramas.fps}
   data-movil={withBase('/recorrido/m/')}
   data-escritorio={withBase('/recorrido/d/')}
+  data-video-movil={withBase('/recorrido/m.mp4')}
 >
   {paradas.map((p, i) => (
     <span
@@ -92,6 +93,14 @@ const claseTextoSecundario = 'text-neutral-content/90 lg:text-secondary';
             aria-hidden="true"
             data-lienzo
           ></canvas>
+          <video
+            class="absolute inset-0 size-full object-cover opacity-0 transition-opacity duration-500"
+            muted
+            playsinline
+            preload="auto"
+            aria-hidden="true"
+            data-video
+          ></video>
         </div>
       </div>
     </div>
