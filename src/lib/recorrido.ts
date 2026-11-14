@@ -35,10 +35,15 @@ export const duracionRecorrido = 26.46;
 export const fotogramas = { total: 635, fps: 24 } as const;
 
 /**
- * Ritmo del scroll, en alturas de pantalla (vh) por parada: `lectura` con el texto y la
- * imagen quietos, y `trayecto` con la cámara avanzando hasta la siguiente parada.
+ * Ritmo del scroll, en alturas de pantalla (vh) por parada: `lectura` con el texto visible y
+ * la cámara en la parada, y `trayecto` con la cámara avanzando hasta la siguiente. En móvil
+ * es más corto: el dedo recorre menos pantalla por gesto y un tramo largo sin cambios parece
+ * que no responde.
  */
-export const ritmo = { lectura: 120, trayecto: 130 } as const;
+export const ritmo = {
+  movil: { lectura: 45, trayecto: 85 },
+  escritorio: { lectura: 80, trayecto: 120 },
+} as const;
 
 export const hero = {
   titulo: 'Clínica de fisioterapia en Albacete — Ikaika Salud',

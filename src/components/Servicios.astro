@@ -1,6 +1,6 @@
 ---
 /** «Nuestros Servicios», como en ikaikasalud.es: las 7 tarjetas con sus ilustraciones. */
-import { servicios, serviciosIntro } from '../lib/recorrido';
+import { hero, servicios, serviciosIntro } from '../lib/recorrido';
 import { withBase } from '../lib/withBase';
 ---
 
@@ -9,6 +9,7 @@ import { withBase } from '../lib/withBase';
     <h2 id="servicios-titulo" class="heading-2 text-center">
       Nuestros Servicios
     </h2>
+    <p class="body-3 mx-auto mt-4 max-w-3xl text-center">{hero.textos[1]}</p>
     <p class="body-6 text-secondary mx-auto mt-4 max-w-3xl text-center">{serviciosIntro}</p>
     <ul class="mt-12 grid gap-8 md:grid-cols-2">
       {servicios.map((s, i) => (

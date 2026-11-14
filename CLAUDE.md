@@ -34,13 +34,17 @@ como `{{marcador}}`.
   + texto de la parada) dentro de una sección alta; `Icono.astro`, los iconos de Phosphor en
   línea.
 - `src/scripts/recorrido.ts` — scroll → parada y fotograma. Cada parada es un tramo de
-  `lectura` (texto visible, imagen quieta) + `trayecto` (la cámara avanza). La imagen es una
+  `lectura` (texto visible, cámara en la parada) + `trayecto` (la cámara avanza), más corto en
+  móvil que en escritorio. Todo lo que se mueve (texto que entra escalonado y sale, fundido
+  foto ↔ secuencia, acercamiento) se calcula de la posición del scroll en cada fotograma, sin
+  transiciones CSS por tiempo; en táctil la imagen va pegada al dedo (sin suavizado). En móvil
+  el texto va sobre la imagen con un velo `neutral`, sin tarjeta. La imagen es una
   secuencia WebP pintada en `<canvas>`, mezclando fotogramas vecinos; no es un `<video>`
   porque buscar en un vídeo con `currentTime` va a tirones. Con movimiento reducido no
   descarga la secuencia y enseña la foto de la parada.
 - `src/lib/` — datos fuera del marcado: `sitio.ts`, `contacto.ts` (teléfono, WhatsApp,
   horario, legales), `recorrido.ts` (paradas con su segundo del recorrido, `ritmo` del
-  scroll, `fotogramas`, motivos, equipo, FAQ) y `withBase.ts`.
+  scroll por dispositivo, `fotogramas`, motivos, equipo, FAQ) y `withBase.ts`.
 - `public/recorrido/` — `m/` (540×960, móvil) y `d/` (720×1280, escritorio): 635 fotogramas
   a 24 fps, `0001.webp`…, y `parada-N.webp`: la foto original de cada parada (1080×1920),
   que se ve nítida encima de la secuencia mientras se lee la parada. Si cambia el montaje,

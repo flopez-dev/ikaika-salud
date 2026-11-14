@@ -1,10 +1,10 @@
 ---
 /**
- * Recorrido por la clínica controlado por el scroll. Una «escena» fija a pantalla completa
- * (sticky) con la imagen del recorrido y el texto de la parada: a pantalla completa en móvil
- * con el texto en una tarjeta abajo, en dos columnas en escritorio. La sección es alta
- * (`ritmo` en src/lib/recorrido.ts) y `src/scripts/recorrido.ts` traduce cuánto se ha bajado
- * en qué parada se está y qué fotograma toca.
+ * Recorrido por la clínica controlado por el scroll. Una «escena» fija (sticky) con la imagen
+ * del recorrido y el texto de la parada: en móvil, la imagen a pantalla completa y el texto
+ * abajo, sobre un velo oscuro; en escritorio, en dos columnas. La sección es alta (`ritmo` en
+ * src/lib/recorrido.ts, distinto en móvil y en escritorio) y `src/scripts/recorrido.ts`
+ * traduce cuánto se ha bajado en qué fotograma toca y cuánto se ve cada texto y cada foto.
  *
  * La imagen es una secuencia de fotogramas pintada en un <canvas> (no un vídeo): pintar un
  * fotograma es instantáneo, así que el movimiento sigue al dedo sin tirones.
@@ -28,34 +28,40 @@ const fotos = [
 ];
 
 const total = paradas.length + 1;
-const tramo = ritmo.lectura + ritmo.trayecto;
+const tramo = (r: { lectura: number; trayecto: number }) => r.lectura + r.trayecto;
 // Cada parada dura un tramo (el de la última es el trayecto hasta el final de la secuencia),
 // más la altura de la propia escena fija.
-const alto = `${total * tramo + 100}vh`;
+const alto = (r: { lectura: number; trayecto: number }) => `${total * tramo(r) + 100}vh`;
 // Ancla de cada parada, a mitad de su lectura, para los enlaces del menú.
-const ancla = (i: number) => `${i * tramo + ritmo.lectura * 0.3}vh`;
+const ancla = (r: { lectura: number; trayecto: number }, i: number) =>
+  `${i * tramo(r) + r.lectura * 0.5}vh`;
 
 const clasePanel =
-  'card bg-base-100/95 w-full max-w-xl shadow-lg backdrop-blur-md lg:bg-transparent lg:shadow-none lg:backdrop-blur-none';
+  'panel w-full px-4 pt-28 pb-[calc(100lvh-100svh+5.5rem)] text-neutral-content lg:max-w-xl lg:p-0 lg:text-base-content';
+const claseTextoSecundario = 'text-neutral-content/90 lg:text-secondary';
 ---
 
 <section
   id="recorrido"
   aria-label="Recorrido por la clínica"
   class="recorrido relative"
-  style={`--alto-recorrido: ${alto}`}
+  style={`--alto-m: ${alto(ritmo.movil)}; --alto-d: ${alto(ritmo.escritorio)}`}
   data-recorrido
   data-duracion={duracionRecorrido}
   data-tiempos={JSON.stringify([0, ...paradas.map((p) => p.tiempo)])}
-  data-lectura={ritmo.lectura}
-  data-trayecto={ritmo.trayecto}
+  data-ritmo={JSON.stringify(ritmo)}
   data-total={fotogramas.total}
   data-fps={fotogramas.fps}
   data-movil={withBase('/recorrido/m/')}
   data-escritorio={withBase('/recorrido/d/')}
 >
   {paradas.map((p, i) => (
-    <span id={p.id} class="absolute left-0" style={`top: ${ancla(i + 1)}`} aria-hidden="true" />
+    <span
+      id={p.id}
+      class="ancla absolute left-0"
+      style={`--top-m: ${ancla(ritmo.movil, i + 1)}; --top-d: ${ancla(ritmo.escritorio, i + 1)}`}
+      aria-hidden="true"
+    />
   ))}
 
   <div class="escena relative lg:grid lg:grid-cols-2">
@@ -64,71 +70,78 @@ const clasePanel =
         class="bg-base-300 relative size-full overflow-hidden lg:aspect-9/16 lg:h-full lg:w-auto lg:rounded-box lg:shadow-xl"
         data-marco
       >
-        {fotos.map((f, i) => (
-          <img
-            src={withBase(f.src)}
-            alt={f.alt}
-            width="720"
-            height="1280"
-            loading="eager"
-            decoding="async"
-            fetchpriority={i === 0 ? 'high' : 'low'}
-            class:list={[
-              'ease-suave absolute inset-0 z-10 size-full object-cover transition-opacity duration-400',
-              i === 0 ? 'opacity-100' : 'opacity-0',
-            ]}
-            data-foto
-          />
-        ))}
-        <canvas
-          class="ease-suave absolute inset-0 size-full opacity-0 transition-opacity duration-500"
-          aria-hidden="true"
-          data-lienzo
-        ></canvas>
+        <div class="pointer-events-none absolute inset-0" data-zoom>
+          {fotos.map((f, i) => (
+            <img
+              src={withBase(f.src)}
+              alt={f.alt}
+              width="720"
+              height="1280"
+              loading="eager"
+              decoding="async"
+              fetchpriority={i === 0 ? 'high' : 'low'}
+              class:list={[
+                'absolute inset-0 z-10 size-full object-cover',
+                i === 0 ? 'opacity-100' : 'opacity-0',
+              ]}
+              data-foto
+            />
+          ))}
+          <canvas
+            class="ease-suave absolute inset-0 size-full opacity-0 transition-opacity duration-500"
+            aria-hidden="true"
+            data-lienzo
+          ></canvas>
+        </div>
       </div>
     </div>
 
-    <div class="paneles relative grid px-4 pt-24 pb-6 lg:items-center lg:px-12 xl:px-20">
+    <div class="paneles relative z-20 grid lg:items-center lg:px-12 xl:px-20">
       <div class={clasePanel} data-panel>
-        <div class="card-body gap-4 p-6 lg:p-0">
+        <div class="card-body gap-4 p-0">
           <h1 class="heading-1">{hero.titulo}</h1>
-          {hero.textos.map((t) => (
-            <p class="body-6 lg:body-3 text-secondary max-w-[680px]">{t}</p>
-          ))}
-          <p class="body-3 flex items-center gap-2">
-            <Icono nombre="phone" class="size-5" />
-            <a href={contacto.telefonoHref} class="link link-hover">
-              {contacto.telefono}
-            </a>
-          </p>
-          <p class="body-6 text-secondary">
-            {contacto.calle} – {contacto.ciudad}
+          <p class:list={['body-6 lg:body-3 max-w-[680px]', claseTextoSecundario]}>
+            {hero.textos[0]}
           </p>
           <div class="pt-1">
             <a
               href={contacto.whatsappHref}
-              class="btn btn-primary px-8 font-bold"
+              class="btn btn-accent lg:btn-primary pulsable gap-2 px-6 font-bold"
               target="_blank"
               rel="noopener"
             >
+              <Icono nombre="whatsapp-logo" class="size-5" />
               Contáctanos por WhatsApp
             </a>
           </div>
         </div>
+        <p
+          class:list={['caption-3 mt-6 flex items-center gap-2 lg:mt-10', claseTextoSecundario]}
+          aria-hidden="true"
+          data-pista
+        >
+          <span class="pista-flecha inline-flex">
+            <Icono nombre="arrow-down" class="size-4" />
+          </span>
+          Desliza para entrar
+        </p>
       </div>
 
       {paradas.map((p) => (
         <div class={clasePanel} data-panel>
-          <div class="card-body gap-3 p-6 lg:p-0">
-            <p class="caption-3 text-secondary">{p.lugar}</p>
-            <h2 class="heading-3 lg:heading-2">{p.titulo}</h2>
+          <div class="card-body gap-2 p-0 lg:gap-3">
+            <p class:list={['caption-3', claseTextoSecundario]}>{p.lugar}</p>
+            <h2 class="heading-5 lg:heading-2">{p.titulo}</h2>
             {p.textos.map((t) => (
-              <p class="body-6 lg:body-3 text-secondary max-w-[680px]">{t}</p>
+              <p class:list={['body-6 lg:body-3 max-w-[680px]', claseTextoSecundario]}>{t}</p>
             ))}
             {p.enlaces.length > 0 && (
-              <div class="flex flex-wrap gap-2 pt-2">
+              <div class="enlaces -mx-4 flex flex-nowrap gap-2 overflow-x-auto px-4 pt-2 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0">
                 {p.enlaces.map((e) => (
-                  <a href={e.href} class="btn btn-primary btn-sm rounded-md px-4 font-normal">
+                  <a
+                    href={e.href}
+                    class="btn btn-sm lg:btn-primary pulsable shrink-0 rounded-md px-4 font-normal"
+                  >
                     {e.texto}
                   </a>
                 ))}
@@ -142,57 +155,134 @@ const clasePanel =
 </section>
 
 <style>
-  /* Con JS: sección alta, escena fija a pantalla completa y un solo panel visible a la vez,
-     superpuestos en la misma celda (la tarjeta abajo en móvil, centrada en escritorio). */
+  /* Con JS: sección alta, escena fija y los paneles superpuestos en la misma celda (abajo en
+     móvil, centrados en escritorio). Lo que se ve de cada panel y foto lo escribe el script
+     en cada fotograma según el scroll: aquí no hay transiciones por tiempo. */
   :global(.js) .recorrido {
-    height: var(--alto-recorrido);
+    height: var(--alto-m);
   }
+  :global(.js) .ancla {
+    top: var(--top-m);
+  }
+  /* `lvh`: el alto no cambia al esconderse la barra del navegador, así que no hay saltos. */
   :global(.js) .escena {
     position: sticky;
     top: 0;
-    height: 100dvh;
+    height: 100lvh;
     overflow: hidden;
   }
   :global(.js) .paneles {
     position: absolute;
     inset: auto 0 0 0;
   }
-  @media (min-width: 64rem) {
-    :global(.js) .paneles {
-      position: relative;
-      inset: auto;
-      height: 100dvh;
-    }
-  }
   :global(.js) [data-panel] {
     grid-area: 1 / 1;
     align-self: end;
+    will-change: opacity, transform;
+  }
+  /* Antes de que corra el script solo se ve el titular. */
+  :global(.js) [data-panel]:not(:first-child) {
     opacity: 0;
     visibility: hidden;
-    transform: translateY(1.5rem);
-    transition:
-      opacity 0.6s var(--ease-suave),
-      transform 0.6s var(--ease-suave),
-      visibility 0s linear 0.6s;
   }
+
   @media (min-width: 64rem) {
+    :global(.js) .recorrido {
+      height: var(--alto-d);
+    }
+    :global(.js) .ancla {
+      top: var(--top-d);
+    }
+    :global(.js) .paneles {
+      position: relative;
+      inset: auto;
+      height: 100lvh;
+    }
     :global(.js) [data-panel] {
       align-self: center;
     }
   }
-  :global(.js) [data-panel][data-activo] {
-    opacity: 1;
-    visibility: visible;
-    transform: none;
-    transition-delay: 0s;
+
+  /* Móvil: el texto va sobre la imagen, con un velo del color neutral del tema que es opaco
+     detrás del texto (blanco sobre él, ≥ 6:1 aun con la foto más clara) y se desvanece hacia
+     arriba en el relleno superior del panel. */
+  @media (max-width: 63.99rem) {
+    .panel {
+      background: linear-gradient(
+        to top,
+        color-mix(in oklab, var(--color-neutral) 88%, transparent) calc(100% - 7rem),
+        color-mix(in oklab, var(--color-neutral) 45%, transparent) calc(100% - 3.5rem),
+        transparent
+      );
+    }
+    .enlaces {
+      scrollbar-width: none;
+    }
   }
+
+  /* Botones: respuesta inmediata al pulsar. */
+  .pulsable {
+    transition-property: color, background-color, border-color, box-shadow, scale, translate;
+    transition-duration: 160ms;
+    transition-timing-function: var(--ease-suave);
+  }
+  .pulsable:active {
+    scale: 0.97;
+  }
+
+  /* Entrada del titular al cargar: escalonada y corta. `backwards` solo aplica el estado
+     inicial durante el retraso; luego mandan los estilos que escribe el script. */
+  :global(.js) [data-panel]:first-child .card-body > * {
+    animation: entrada 520ms var(--ease-suave) backwards;
+  }
+  :global(.js) [data-panel]:first-child .card-body > :nth-child(2) {
+    animation-delay: 60ms;
+  }
+  :global(.js) [data-panel]:first-child .card-body > :nth-child(3) {
+    animation-delay: 120ms;
+  }
+  :global(.js) [data-panel]:first-child [data-pista] {
+    animation: aparece 520ms var(--ease-suave) 400ms backwards;
+  }
+  @keyframes entrada {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+  @keyframes aparece {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* Pista de scroll: la flecha baja y sube 4 px. */
+  .pista-flecha {
+    animation: pista 1.6s var(--ease-vaiven) infinite;
+  }
+  @keyframes pista {
+    50% {
+      transform: translateY(4px);
+    }
+  }
+
   /* Sin JS: paneles uno debajo de otro, sobre la foto de la fachada. */
   :global(html:not(.js)) [data-panel] + [data-panel] {
     margin-top: 1rem;
   }
+  :global(html:not(.js)) [data-pista] {
+    display: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    :global(.js) [data-panel] {
-      transform: none;
+    :global(.js) [data-panel]:first-child .card-body > * {
+      animation-name: aparece;
+    }
+    .pista-flecha {
+      animation: none;
+    }
+    .pulsable:active {
+      scale: none;
     }
   }
 </style>
