@@ -27,3 +27,6 @@ blob-report/
 
 # Claude Code — personal settings stay local, .claude/settings.json es compartido
 .claude/settings.local.json
+
+# Fotos originales y clips crudos de Higgsfield (33 MB): fuente del recorrido, no se publican
+src/photos/

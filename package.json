@@ -16,6 +16,8 @@
     "test:e2e": "npm run build && npx astro preview --background --port 4323 && npx playwright test; code=$?; npx astro preview stop; exit $code"
   },
   "dependencies": {
+    "@fontsource/lato": "^5.3.0",
+    "@phosphor-icons/core": "^2.1.1",
     "astro": "^7.4.12"
   },
   "devDependencies": {

@@ -39,6 +39,12 @@ const sitioNoIndexado = process.env.NOINDEX_SITE === 'true';
     <meta property="og:description" content={description} />
     <meta property="og:locale" content="es_ES" />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(withBase('/recorrido/parada-1.webp'), Astro.site)} />
+
+    {/* Marca que hay JS: lo que se oculta para animarlo solo se oculta si luego se puede mostrar. */}
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
 
     <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
 

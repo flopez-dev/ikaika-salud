@@ -32,3 +32,50 @@ test('la 404 lleva noindex y enlaza a la home', async ({ page }) => {
   await expect(page.locator('h1')).toHaveCount(1);
   expect(new URL(page.url()).pathname).toBe(process.env.BASE_PATH ?? '/ikaika-salud/');
 });
+
+test('el recorrido avanza con el scroll, se para en cada parada y vuelve atrás al subir', async ({
+  page,
+}) => {
+  await page.goto('');
+  const lienzo = page.locator('[data-lienzo]');
+  // El canvas sustituye a la foto en cuanto pinta su primer fotograma.
+  await expect(lienzo).toHaveClass(/opacity-100/, { timeout: 15_000 });
+  const fotograma = () => lienzo.evaluate((c) => Number(c.dataset.fotograma ?? -1));
+
+  // Al bajar a mitad de la sección, la cámara ha avanzado y hay otro panel activo.
+  const mitad = await page.evaluate(() => {
+    const r = document.querySelector<HTMLElement>('[data-recorrido]')!;
+    return Math.round(r.offsetTop + r.offsetHeight / 2 - innerHeight);
+  });
+  await page.evaluate((y) => window.scrollTo(0, y), mitad);
+  await expect.poll(fotograma, { timeout: 5_000 }).toBeGreaterThan(100);
+  const enMedio = await fotograma();
+  await expect(page.locator('[data-panel]').first()).not.toHaveAttribute('data-activo');
+
+  // En una parada se ve su foto real, nítida, encima de la secuencia.
+  await page.locator('#parada-fisioterapia').scrollIntoViewIfNeeded();
+  await expect(page.locator('[data-foto]').nth(2)).toHaveClass(/opacity-100/);
+
+  // Al volver arriba, la cámara retrocede y se ve otra vez el titular.
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect.poll(fotograma, { timeout: 5_000 }).toBeLessThan(enMedio);
+  await expect(page.locator('h1')).toBeVisible();
+});
+
+test('con movimiento reducido no descarga la secuencia y enseña la foto de cada parada', async ({
+  browser,
+}) => {
+  const contexto = await browser.newContext({ reducedMotion: 'reduce' });
+  const page = await contexto.newPage();
+  const secuencia: string[] = [];
+  page.on('request', (r) => {
+    if (/\/recorrido\/[md]\//.test(r.url())) secuencia.push(r.url());
+  });
+
+  await page.goto('');
+  await page.locator('#parada-fisioterapia').scrollIntoViewIfNeeded();
+  await expect(page.locator('[data-foto]').nth(2)).toHaveClass(/opacity-100/);
+  await expect(page.locator('[data-panel]').nth(2)).toHaveAttribute('data-activo');
+  expect(secuencia).toEqual([]);
+  await contexto.close();
+});

@@ -1,18 +1,65 @@
 ---
 import Base from '../layouts/Base.astro';
-import { nombreSitio, descripcionSitio } from '../lib/sitio';
+import Navbar from '../components/Navbar.astro';
+import Recorrido from '../components/Recorrido.astro';
+import Servicios from '../components/Servicios.astro';
+import SolicitaInformacion from '../components/SolicitaInformacion.astro';
+import PorQue from '../components/PorQue.astro';
+import Nosotras from '../components/Nosotras.astro';
+import Faq from '../components/Faq.astro';
+import Contacto from '../components/Contacto.astro';
+import Pie from '../components/Pie.astro';
+import { tituloSitio, descripcionSitio, nombreSitio } from '../lib/sitio';
+import { contacto, horarioSchema } from '../lib/contacto';
+import { preguntas } from '../lib/recorrido';
+
+const url = new URL(Astro.url.pathname, Astro.site).href;
+const datos = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalClinic',
+    name: nombreSitio,
+    description: descripcionSitio,
+    url,
+    telephone: '+34614024609',
+    email: contacto.email,
+    medicalSpecialty: 'PhysicalTherapy',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'C/ Alcalde Conangla, 24',
+      postalCode: contacto.codigoPostal,
+      addressLocality: contacto.ciudad,
+      addressCountry: 'ES',
+    },
+    openingHours: horarioSchema,
+    sameAs: [contacto.instagram, contacto.facebook],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: preguntas.map((q) => ({
+      '@type': 'Question',
+      name: q.pregunta,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: [...q.respuesta, ...(q.lista ?? [])].join(' '),
+      },
+    })),
+  },
+];
 ---
 
-<Base title={nombreSitio} description={descripcionSitio}>
-  <main id="main" class="hero min-h-dvh">
-    <div class="hero-content max-w-2xl text-center">
-      <div>
-        <p class="text-primary text-sm font-semibold tracking-widest uppercase">{nombreSitio}</p>
-        <h1 class="mt-4 text-4xl font-bold text-balance sm:text-5xl">Web en construcción</h1>
-        <p class="text-base-content/80 mt-6 text-lg text-pretty">
-          Estamos preparando la página. Muy pronto podrás conocer todo lo que hacemos.
-        </p>
-      </div>
-    </div>
+<Base title={tituloSitio} description={descripcionSitio}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(datos)} />
+  <Navbar />
+  <main id="main">
+    <Recorrido />
+    <Servicios />
+    <Nosotras />
+    <PorQue />
+    <Faq />
+    <Contacto />
+    <SolicitaInformacion />
   </main>
+  <Pie />
 </Base>

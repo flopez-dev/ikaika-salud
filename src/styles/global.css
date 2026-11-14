@@ -1,4 +1,48 @@
 @import 'tailwindcss';
+@import '@fontsource/lato/300.css';
+@import '@fontsource/lato/400.css';
+@import '@fontsource/lato/700.css';
+
+/* Lato autoalojada (nunca <link> a Google Fonts): la tipografía de la web actual del cliente,
+   https://ikaikasalud.es/, en titulares, textos y botones. */
+@theme {
+  --font-sans: 'Lato', ui-sans-serif, system-ui, sans-serif;
+  --ease-suave: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Estilos de texto con nombre: cada texto de la landing usa uno de estos, en vez de combinar
+   tamaño y peso sueltos. Tamaños y pesos copiados de la web actual (titulares de sección de
+   48 px en peso normal, títulos de tarjeta de 24 px en negrita, textos de 14 a 16 px). */
+@utility heading-1 {
+  @apply text-3xl font-bold text-balance sm:text-4xl xl:text-5xl;
+}
+@utility heading-2 {
+  @apply text-4xl font-normal text-balance sm:text-5xl;
+}
+@utility heading-3 {
+  @apply text-2xl font-bold text-balance;
+}
+@utility heading-5 {
+  @apply text-xl font-bold text-balance;
+}
+@utility title-2 {
+  @apply text-lg font-bold text-balance;
+}
+@utility title-3 {
+  @apply text-base font-bold;
+}
+@utility body-3 {
+  @apply text-base font-normal text-pretty;
+}
+@utility body-big {
+  @apply text-lg font-normal text-pretty;
+}
+@utility body-6 {
+  @apply text-sm font-normal text-pretty;
+}
+@utility caption-3 {
+  @apply text-xs font-bold tracking-widest uppercase;
+}
 
 /* daisyUI 5 como librería de componentes (btn, card, navbar, footer…): se usan sus clases en
    vez de componentes hechos a mano. Solo el tema propio; no se cargan los temas de serie. */
@@ -6,49 +50,54 @@
   themes: false;
 }
 
-/* Tema provisional de Ikaika Salud hasta tener la marca: verdes y arena tranquilos, propios
-   de salud. Cuando llegue la paleta real se cambian aquí los valores, no los nombres
-   (primary, secondary…), que es lo que leen los componentes. */
+/* Tema con los colores de la web actual de Ikaika Salud (medidos en ikaikasalud.es): fondo
+   blanco, texto casi negro, azul marino de marca en los botones y gris oscuro en el pie.
+   Se cambian aquí los valores, no los nombres (primary, neutral…), que es lo que leen los
+   componentes. Contrastes: blanco sobre primary 10,7:1; base-content sobre blanco 16,8:1. */
 @plugin 'daisyui/theme' {
   name: 'ikaika';
   default: true;
   prefersdark: false;
   color-scheme: light;
 
-  --color-base-100: oklch(99% 0.005 150);
-  --color-base-200: oklch(96% 0.01 150);
-  --color-base-300: oklch(91% 0.015 150);
-  --color-base-content: oklch(24% 0.02 170);
-  --color-primary: oklch(48% 0.09 170);
-  --color-primary-content: oklch(98% 0.01 170);
-  --color-secondary: oklch(72% 0.08 70);
-  --color-secondary-content: oklch(24% 0.03 70);
-  --color-accent: oklch(62% 0.12 30);
-  --color-accent-content: oklch(98% 0.01 30);
-  --color-neutral: oklch(30% 0.02 170);
-  --color-neutral-content: oklch(96% 0.01 170);
-  --color-info: oklch(60% 0.12 240);
-  --color-info-content: oklch(98% 0.01 240);
-  --color-success: oklch(58% 0.12 150);
-  --color-success-content: oklch(98% 0.01 150);
-  --color-warning: oklch(78% 0.14 80);
-  --color-warning-content: oklch(25% 0.04 80);
-  --color-error: oklch(58% 0.18 25);
-  --color-error-content: oklch(98% 0.01 25);
+  --color-base-100: #ffffff;
+  --color-base-200: #f2f3f6;
+  --color-base-300: #e0e0e0;
+  --color-base-content: #1d1e20;
+  --color-primary: #343e59;
+  --color-primary-content: #ffffff;
+  --color-secondary: #56585e;
+  --color-secondary-content: #ffffff;
+  /* Verde del botón flotante de WhatsApp. */
+  --color-accent: #128c7e;
+  --color-accent-content: #ffffff;
+  --color-neutral: #454545;
+  --color-neutral-content: #ffffff;
+  --color-info: #176be0;
+  --color-info-content: #ffffff;
+  --color-success: #128c7e;
+  --color-success-content: #ffffff;
+  --color-warning: #ffcd35;
+  --color-warning-content: #1d1e20;
+  --color-error: #c0392b;
+  --color-error-content: #ffffff;
 
-  --radius-selector: 1rem;
-  --radius-field: 0.5rem;
+  /* Botones en píldora, tarjetas con esquinas de 16 px, como en la web actual. */
+  --radius-selector: 2rem;
+  --radius-field: 2rem;
   --radius-box: 1rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
-  --depth: 1;
+  --depth: 0;
   --noise: 0;
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* Las anclas no quedan tapadas por la cabecera fija. */
+    scroll-padding-top: 5rem;
   }
 
   @media (prefers-reduced-motion: reduce) {

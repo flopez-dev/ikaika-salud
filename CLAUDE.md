@@ -4,9 +4,12 @@ Landing de Ikaika Salud, cliente de Sayora. Astro 7 + Tailwind CSS v4 + daisyUI 
 común de las landings de clientes de Sayora), TypeScript strict. Copy del sitio en español
 (`lang="es"`); código, comentarios y mensajes de commit, también en español.
 
-Ahora mismo es solo el esqueleto: una home «Web en construcción» y una 404. Faltan la marca
-(paleta, tipografías, logo) y el contenido; lo que no se sepa se queda como `{{marcador}}`
-(p. ej. `descripcionSitio` en `src/lib/sitio.ts`).
+La home es una landing de una página que empieza con un **recorrido por la clínica controlado
+por el scroll** (vídeo vertical generado con Higgsfield a partir de fotos reales) y sigue con
+por qué elegirnos, el equipo, preguntas frecuentes y contacto. Los textos y datos salen de la
+web actual, https://ikaikasalud.es/ (sin precios, testimonios ni cifras: no los tiene, y no se
+inventan). Falta la marca (paleta y logo): el tema es provisional. Lo que no se sepa se queda
+como `{{marcador}}`.
 
 ## Comandos
 
@@ -27,9 +30,27 @@ Ahora mismo es solo el esqueleto: una home «Web en construcción» y una 404. F
   depende de `SITE_URL`/`BASE_PATH`, y con `NOINDEX_SITE=true` cierra todo).
 - `src/layouts/Base.astro` — layout único: `<head>` (canonical, Open Graph, favicon, `noindex`) y
   el enlace «Ir al contenido». Toda página lleva `<main id="main">`.
-- `src/components/` — una sección por componente cuando se maquete la landing.
-- `src/lib/` — datos fuera del marcado: `sitio.ts` (nombre y descripción) y `withBase.ts`.
-- `src/styles/global.css` — Tailwind, el plugin de daisyUI y el tema `ikaika`. Único `.css`.
+- `src/components/` — una sección por componente. `Recorrido.astro` es la escena fija (imagen
+  + texto de la parada) dentro de una sección alta; `Icono.astro`, los iconos de Phosphor en
+  línea.
+- `src/scripts/recorrido.ts` — scroll → parada y fotograma. Cada parada es un tramo de
+  `lectura` (texto visible, imagen quieta) + `trayecto` (la cámara avanza). La imagen es una
+  secuencia WebP pintada en `<canvas>`, mezclando fotogramas vecinos; no es un `<video>`
+  porque buscar en un vídeo con `currentTime` va a tirones. Con movimiento reducido no
+  descarga la secuencia y enseña la foto de la parada.
+- `src/lib/` — datos fuera del marcado: `sitio.ts`, `contacto.ts` (teléfono, WhatsApp,
+  horario, legales), `recorrido.ts` (paradas con su segundo del recorrido, `ritmo` del
+  scroll, `fotogramas`, motivos, equipo, FAQ) y `withBase.ts`.
+- `public/recorrido/` — `m/` (540×960, móvil) y `d/` (720×1280, escritorio): 635 fotogramas
+  a 24 fps, `0001.webp`…, y `parada-N.webp`: la foto original de cada parada (1080×1920),
+  que se ve nítida encima de la secuencia mientras se lee la parada. Si cambia el montaje,
+  hay que regenerar las dos secuencias y volver a medir los `tiempo` de `src/lib/recorrido.ts`
+  (fotograma más parecido a cada foto, con SSIM). El
+  montaje sale de `~/Documents/recorrido-ikaika/`
+  (`montar_scroll_v4.sh`, variante `salida_fluida_t7`); los clips crudos están en
+  `src/photos/`, que no se sube al repo.
+- `src/styles/global.css` — Tailwind, daisyUI, el tema `ikaika`, Manrope y los estilos de
+  texto con nombre (`heading-1`, `body-3`, `caption-3`…). Único `.css`.
 
 ## Reglas no obvias
 
