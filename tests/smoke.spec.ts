@@ -61,7 +61,7 @@ test('el recorrido avanza con el scroll, se para en cada parada y vuelve atrás 
       .getElementById('parada-fisioterapia')!
       .scrollIntoView({ block: 'start', behavior: 'instant' }),
   );
-  await expect(page.locator('[data-foto]').nth(2)).toHaveClass(/opacity-100/);
+  await expect(page.locator('[data-foto]').nth(2)).toHaveAttribute('data-visible');
 
   // Al volver arriba, la cámara retrocede y se ve otra vez el titular.
   await page.evaluate(() => window.scrollTo(0, 0));
@@ -80,8 +80,13 @@ test('con movimiento reducido no descarga la secuencia y enseña la foto de cada
   });
 
   await page.goto('');
-  await page.locator('#parada-fisioterapia').scrollIntoViewIfNeeded();
-  await expect(page.locator('[data-foto]').nth(2)).toHaveClass(/opacity-100/);
+  // Como el enlace del menú (ancla arriba): ver el comentario del test anterior.
+  await page.evaluate(() =>
+    document
+      .getElementById('parada-fisioterapia')!
+      .scrollIntoView({ block: 'start', behavior: 'instant' }),
+  );
+  await expect(page.locator('[data-foto]').nth(2)).toHaveAttribute('data-visible');
   await expect(page.locator('[data-panel]').nth(2)).toHaveAttribute('data-activo');
   expect(secuencia).toEqual([]);
   await contexto.close();

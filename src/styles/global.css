@@ -7,7 +7,10 @@
    https://ikaikasalud.es/, en titulares, textos y botones. */
 @theme {
   --font-sans: 'Lato', ui-sans-serif, system-ui, sans-serif;
+  /* Entradas y respuestas (ease-out fuerte). */
   --ease-suave: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Movimiento de ida y vuelta en pantalla (ease-in-out fuerte). */
+  --ease-vaiven: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 /* Estilos de texto con nombre: cada texto de la landing usa uno de estos, en vez de combinar
