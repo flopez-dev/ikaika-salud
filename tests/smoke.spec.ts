@@ -52,8 +52,15 @@ test('el recorrido avanza con el scroll, se para en cada parada y vuelve atrás 
   const enMedio = await fotograma();
   await expect(page.locator('[data-panel]').first()).not.toHaveAttribute('data-activo');
 
-  // En una parada se ve su foto real, nítida, encima de la secuencia.
-  await page.locator('#parada-fisioterapia').scrollIntoViewIfNeeded();
+  // En una parada se ve su foto real, nítida, encima de la secuencia. Se baja como el enlace
+  // del menú (ancla arriba) y sin `smooth`: `scrollIntoViewIfNeeded()` centra el ancla, lo que
+  // deja el scroll en el trayecto anterior, y con el scroll suave depende de lo rápida que vaya
+  // la máquina (en CI fallaba).
+  await page.evaluate(() =>
+    document
+      .getElementById('parada-fisioterapia')!
+      .scrollIntoView({ block: 'start', behavior: 'instant' }),
+  );
   await expect(page.locator('[data-foto]').nth(2)).toHaveClass(/opacity-100/);
 
   // Al volver arriba, la cámara retrocede y se ve otra vez el titular.
