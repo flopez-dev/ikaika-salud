@@ -24,7 +24,7 @@
     "@astrojs/check": "^0.9.12",
     "@astrojs/sitemap": "^3.7.5",
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.65.0",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/vite": "^4.3.5",
     "@typescript-eslint/parser": "^8.72.2",
     "daisyui": "^5.8.0",
