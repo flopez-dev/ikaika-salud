@@ -27,7 +27,7 @@
     "@playwright/test": "^1.65.0",
     "@tailwindcss/vite": "^4.3.5",
     "@typescript-eslint/parser": "^8.72.2",
-    "daisyui": "^5.8.0",
+    "daisyui": "^5.8.1",
     "eslint": "^10.14.0",
     "eslint-plugin-astro": "^3.2.1",
     "prettier": "^3.10.1",
